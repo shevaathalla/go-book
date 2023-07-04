@@ -1,0 +1,10 @@
+CREATE TABLE authors(
+    id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT NULL,
+
+    PRIMARY KEY (id),
+    INDEX authors_name_index (name)
+)
