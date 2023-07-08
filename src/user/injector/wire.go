@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func InitializeUserHandler(db *gorm.DB) *userHandler.UserHandler {
+func InitializeService(db *gorm.DB) *userHandler.UserHandler {
 	wire.Build(
 		userRepository.NewUserRepository,
 		userService.NewUserService,

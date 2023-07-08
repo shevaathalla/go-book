@@ -8,6 +8,8 @@ import (
 	"github.com/joho/godotenv"
 
 	mysql "gobook/pkg/db/mysql"
+	register "gobook/src/register/injector"
+	user "gobook/src/user/injector"
 )
 
 func init() {
@@ -22,7 +24,7 @@ func init() {
 func main() {
 	r := gin.Default()
 
-	mysql.DB() // <- yg ini
+	db := mysql.DB() // <- yg ini
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -30,7 +32,8 @@ func main() {
 		})
 	})
 
-	// user.InitializeUserHandler(db).Route(&r.RouterGroup)
-	r.Run("127.0.0.1:8000") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	user.InitializeService(db).Route(&r.RouterGroup)
+	register.InitializeService(db).Route(&r.RouterGroup)
+	r.Run("127.0.0.1:8000") // listen and serve on 0.0.0.0:8000 (for windows "localhost:8000")
 
 }

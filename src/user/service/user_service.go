@@ -1,9 +1,13 @@
 package user
 
 import (
+	"database/sql"
+	"fmt"
+	"gobook/pkg/utils"
 	userDto "gobook/src/user/dto"
 	userEntity "gobook/src/user/entity"
 	userRepository "gobook/src/user/repository"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -14,11 +18,36 @@ type UserService interface {
 	FindByEmail(email string) (*userEntity.User, error)
 	Create(userDto userDto.CreateUserRequestBody) (*userEntity.User, error)
 	Update(id int, userDto userDto.UpdateUserRequestBody) (*userEntity.User, error)
+	Verify(id int) (*userEntity.User, error)
 	Delete(id int) error
 }
 
 type UserServiceImpl struct {
 	userRepository userRepository.UserRepository
+}
+
+// Verify implements UserService.
+func (userService *UserServiceImpl) Verify(id int) (*userEntity.User, error) {
+	user, err := userService.userRepository.FindById(id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	user.EmailVerifiedAt = sql.NullTime{
+		Time:  time.Now(),
+		Valid: true,
+	}
+
+	updatedUser, err := userService.userRepository.Update(*user)
+
+	fmt.Println(updatedUser)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedUser, nil
 }
 
 func NewUserService(userRepository userRepository.UserRepository) UserService {
@@ -45,13 +74,16 @@ func (userService *UserServiceImpl) Create(userDto userDto.CreateUserRequestBody
 		return nil, err
 	}
 
+	codeVerified := utils.RandStringRunes(4)
+
 	dataUser := userEntity.User{
-		Name:     userDto.Name,
-		Email:    userDto.Email,
-		Password: string(hashedPassword),
-		Address:  userDto.Address,
-		Instance: userDto.Instance,
-		Phone:    userDto.Phone,
+		Name:         userDto.Name,
+		Email:        userDto.Email,
+		Password:     string(hashedPassword),
+		Address:      userDto.Address,
+		Instance:     userDto.Instance,
+		Phone:        userDto.Phone,
+		CodeVerified: codeVerified,
 	}
 
 	createdUser, err := userService.userRepository.Create(dataUser)

@@ -15,7 +15,7 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeUserHandler(db *gorm.DB) *user.UserHandler {
+func InitializeService(db *gorm.DB) *user.UserHandler {
 	userRepository := user2.NewUserRepository(db)
 	userService := user3.NewUserService(userRepository)
 	userHandler := user.NewUserHandler(userService)

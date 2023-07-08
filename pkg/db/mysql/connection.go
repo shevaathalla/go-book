@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"fmt"
+	"os"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -9,7 +10,7 @@ import (
 
 func DB() *gorm.DB {
 
-	host := "127.0.0.1"
+	host := os.Getenv("DB_HOST")
 	port := "3306"
 	dbname := "gobook"
 	username := "root"
