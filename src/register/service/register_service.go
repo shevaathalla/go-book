@@ -9,7 +9,7 @@ import (
 )
 
 type RegisterService interface {
-	Register(userDto userDto.CreateUserRequestBody) error
+	Register(userDto userDto.CreateUserRequest) error
 	VerifyEmail(registerDto registerDto.VerifyEmail) error
 }
 
@@ -30,13 +30,13 @@ func (registerService *RegisterServiceImpl) VerifyEmail(registerDto registerDto.
 		return err
 	}
 
-	registerService.userService.Verify(int(user.Id))
+	registerService.userService.Verify(int(user.ID))
 
 	return nil
 }
 
 // Register implements RegisterService.
-func (registerService *RegisterServiceImpl) Register(userDto userDto.CreateUserRequestBody) error {
+func (registerService *RegisterServiceImpl) Register(userDto userDto.CreateUserRequest) error {
 
 	// create user
 	user, err := registerService.userService.Create(userDto)

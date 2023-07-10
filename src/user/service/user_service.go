@@ -2,8 +2,6 @@ package user
 
 import (
 	"database/sql"
-	"fmt"
-	"gobook/pkg/utils"
 	userDto "gobook/src/user/dto"
 	userEntity "gobook/src/user/entity"
 	userRepository "gobook/src/user/repository"
@@ -16,18 +14,22 @@ type UserService interface {
 	FindAll() []userEntity.User
 	FindById(id int) (*userEntity.User, error)
 	FindByEmail(email string) (*userEntity.User, error)
-	Create(userDto userDto.CreateUserRequestBody) (*userEntity.User, error)
-	Update(id int, userDto userDto.UpdateUserRequestBody) (*userEntity.User, error)
 	Verify(id int) (*userEntity.User, error)
-	Delete(id int) error
+	Create(userDto userDto.CreateUserRequest) (*userEntity.User, error)
 }
 
 type UserServiceImpl struct {
 	userRepository userRepository.UserRepository
 }
 
+// FindByEmail implements UserService.
+func (userService *UserServiceImpl) FindByEmail(email string) (*userEntity.User, error) {
+	return userService.userRepository.FindByEmail(email)
+}
+
 // Verify implements UserService.
 func (userService *UserServiceImpl) Verify(id int) (*userEntity.User, error) {
+
 	user, err := userService.userRepository.FindById(id)
 
 	if err != nil {
@@ -39,9 +41,8 @@ func (userService *UserServiceImpl) Verify(id int) (*userEntity.User, error) {
 		Valid: true,
 	}
 
+	// update user to database
 	updatedUser, err := userService.userRepository.Update(*user)
-
-	fmt.Println(updatedUser)
 
 	if err != nil {
 		return nil, err
@@ -50,23 +51,9 @@ func (userService *UserServiceImpl) Verify(id int) (*userEntity.User, error) {
 	return updatedUser, nil
 }
 
-func NewUserService(userRepository userRepository.UserRepository) UserService {
-	return &UserServiceImpl{userRepository}
-}
-
-func (userService *UserServiceImpl) FindAll() []userEntity.User {
-	return userService.userRepository.FindAll()
-}
-
-func (userService *UserServiceImpl) FindById(id int) (*userEntity.User, error) {
-	return userService.userRepository.FindById(id)
-}
-
-func (userService *UserServiceImpl) FindByEmail(email string) (*userEntity.User, error) {
-	return userService.userRepository.FindByEmail(email)
-}
-
-func (userService *UserServiceImpl) Create(userDto userDto.CreateUserRequestBody) (*userEntity.User, error) {
+// Create implements UserService.
+func (userService *UserServiceImpl) Create(userDto userDto.CreateUserRequest) (*userEntity.User, error) {
+	var user userEntity.User
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userDto.Password), bcrypt.DefaultCost)
 
@@ -74,49 +61,29 @@ func (userService *UserServiceImpl) Create(userDto userDto.CreateUserRequestBody
 		return nil, err
 	}
 
-	codeVerified := utils.RandStringRunes(4)
-
-	dataUser := userEntity.User{
-		Name:         userDto.Name,
-		Email:        userDto.Email,
-		Password:     string(hashedPassword),
-		Address:      userDto.Address,
-		Instance:     userDto.Instance,
-		Phone:        userDto.Phone,
-		CodeVerified: codeVerified,
-	}
-
-	createdUser, err := userService.userRepository.Create(dataUser)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return createdUser, nil
-}
-
-func (userService *UserServiceImpl) Update(id int, userDto userDto.UpdateUserRequestBody) (*userEntity.User, error) {
-
-	user, err := userService.userRepository.FindById(id)
-
-	if err != nil {
-		return nil, err
-	}
-
 	user.Name = userDto.Name
+	user.Email = userDto.Email
+	user.Password = string(hashedPassword)
 	user.Address = userDto.Address
 	user.Phone = userDto.Phone
 	user.Instance = userDto.Instance
 
-	updatedUser, err := userService.userRepository.Update(*user)
+	// create new user to database
+	userService.userRepository.Create(user)
 
-	if err != nil {
-		return nil, err
-	}
-
-	return updatedUser, nil
+	return &user, nil
 }
 
-func (userService *UserServiceImpl) Delete(id int) error {
-	return userService.userRepository.Delete(id)
+// FindAll implements UserService.
+func (userService *UserServiceImpl) FindAll() []userEntity.User {
+	return userService.userRepository.FindAll()
+}
+
+// FindById implements UserService.
+func (userService *UserServiceImpl) FindById(id int) (*userEntity.User, error) {
+	return userService.userRepository.FindById(id)
+}
+
+func NewUserService(userRepository userRepository.UserRepository) UserService {
+	return &UserServiceImpl{userRepository}
 }

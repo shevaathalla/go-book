@@ -8,6 +8,9 @@ import (
 	"github.com/joho/godotenv"
 
 	mysql "gobook/pkg/db/mysql"
+	author "gobook/src/author/injector"
+	book "gobook/src/book/injector"
+	publisher "gobook/src/publisher/injector"
 	register "gobook/src/register/injector"
 	user "gobook/src/user/injector"
 )
@@ -34,6 +37,9 @@ func main() {
 
 	user.InitializeService(db).Route(&r.RouterGroup)
 	register.InitializeService(db).Route(&r.RouterGroup)
+	author.InitializeService(db).Route(&r.RouterGroup)
+	publisher.InitializeService(db).Route(&r.RouterGroup)
+	book.InitializeService(db).Route(&r.RouterGroup)
 	r.Run("127.0.0.1:8000") // listen and serve on 0.0.0.0:8000 (for windows "localhost:8000")
 
 }

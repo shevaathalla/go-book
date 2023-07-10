@@ -1,7 +1,6 @@
 package user
 
 import (
-	"gobook/pkg/utils"
 	userDto "gobook/src/user/dto"
 	userService "gobook/src/user/service"
 	"net/http"
@@ -19,93 +18,103 @@ func NewUserHandler(userService userService.UserService) *UserHandler {
 }
 
 func (userHandler *UserHandler) Route(r *gin.RouterGroup) {
-
 	userRouter := r.Group("/api/user")
-
-	userRouter.GET("", userHandler.FindAll)
+	userRouter.GET("/", userHandler.FindAll)
 	userRouter.GET("/:id", userHandler.FindById)
-	userRouter.POST("", userHandler.Create)
-	userRouter.PATCH("/:id", userHandler.Update)
-	userRouter.DELETE("/:id", userHandler.Delete)
+	userRouter.POST("/", userHandler.Create)
 }
 
 func (userHandler *UserHandler) FindAll(ctx *gin.Context) {
 	data := userHandler.userService.FindAll()
 
-	// return data
-	ctx.JSON(http.StatusOK, utils.Response(http.StatusOK, "success fetch data all user", data))
+	ctx.JSON(http.StatusOK, gin.H{
+		"status":  http.StatusOK,
+		"message": "success fetch data all user",
+		"data":    data,
+	})
 }
 
 func (userHandler *UserHandler) FindById(ctx *gin.Context) {
-	id, _ := strconv.Atoi(ctx.Param("id"))
+
+	id, paramErr := strconv.Atoi(ctx.Param("id"))
+
+	if paramErr != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status":  http.StatusBadRequest,
+			"message": "id not valid",
+			"data":    nil,
+		})
+
+		ctx.Abort()
+		return
+	}
 
 	data, err := userHandler.userService.FindById(id)
 
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, utils.Response(http.StatusNotFound, err.Error(), nil))
-		return
+
+		if err.Error() == "record not found" {
+			ctx.JSON(http.StatusNotFound, gin.H{
+				"status":  http.StatusNotFound,
+				"message": "user not found",
+				"data":    nil,
+			})
+
+			ctx.Abort()
+			return
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "there is something wrong",
+				"data":    nil,
+			})
+
+			ctx.Abort()
+			return
+		}
 	}
 
-	// return data
-	ctx.JSON(http.StatusOK, utils.Response(http.StatusOK, "success fetch data user with id "+ctx.Param("id"), data))
+	ctx.JSON(http.StatusOK, gin.H{
+		"status":  http.StatusOK,
+		"message": "success fetch data user with id " + ctx.Param("id"),
+		"data":    data,
+	})
 }
 
 func (userHandler *UserHandler) Create(ctx *gin.Context) {
-	var input userDto.CreateUserRequestBody
 
-	requestErr := ctx.ShouldBindJSON(&input)
+	var input userDto.CreateUserRequest
 
-	if requestErr != nil {
-		ctx.JSON(http.StatusBadRequest, utils.Response(http.StatusBadRequest, "Bad Request", requestErr.Error()))
+	inputErr := ctx.ShouldBindJSON(&input)
+
+	if inputErr != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status":  http.StatusBadRequest,
+			"message": inputErr.Error(),
+			"data":    nil,
+		})
+
 		ctx.Abort()
 		return
 	}
 
-	createdUser, err := userHandler.userService.Create(input)
+	data, err := userHandler.userService.Create(input)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, utils.Response(http.StatusBadRequest, err.Error(), nil))
-		return
-	}
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"status":  http.StatusInternalServerError,
+			"message": err.Error(),
+			"data":    nil,
+		})
 
-	// return data
-	ctx.JSON(http.StatusOK, utils.Response(http.StatusOK, "success create user", createdUser))
-}
-
-func (userHandler *UserHandler) Update(ctx *gin.Context) {
-	var input userDto.UpdateUserRequestBody
-
-	requestErr := ctx.ShouldBindJSON(&input)
-
-	if requestErr != nil {
-		ctx.JSON(http.StatusBadRequest, utils.Response(http.StatusBadRequest, requestErr.Error(), nil))
 		ctx.Abort()
 		return
 	}
 
-	id, _ := strconv.Atoi(ctx.Param("id"))
+	ctx.JSON(http.StatusOK, gin.H{
+		"status":  http.StatusOK,
+		"message": "success create user",
+		"data":    data,
+	})
 
-	updatedUser, err := userHandler.userService.Update(id, input)
-
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, utils.Response(http.StatusBadRequest, err.Error(), nil))
-		return
-	}
-
-	// return data
-	ctx.JSON(http.StatusOK, utils.Response(http.StatusOK, "success update user", updatedUser))
-}
-
-func (userHandler *UserHandler) Delete(ctx *gin.Context) {
-	id, _ := strconv.Atoi(ctx.Param("id"))
-
-	err := userHandler.userService.Delete(id)
-
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, utils.Response(http.StatusBadRequest, err.Error(), nil))
-		return
-	}
-
-	// return data
-	ctx.JSON(http.StatusOK, utils.Response(http.StatusOK, "success delete user with id "+ctx.Param("id"), nil))
 }

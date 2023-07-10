@@ -25,7 +25,7 @@ func (registerHandler *RegisterHandler) Route(r *gin.RouterGroup) {
 }
 
 func (registerHandler *RegisterHandler) Register(ctx *gin.Context) {
-	var registerRequest userDto.CreateUserRequestBody
+	var registerRequest userDto.CreateUserRequest
 
 	inputErr := ctx.ShouldBindJSON(&registerRequest)
 
