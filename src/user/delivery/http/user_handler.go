@@ -1,6 +1,7 @@
 package user
 
 import (
+	"gobook/src/middleware"
 	userDto "gobook/src/user/dto"
 	userService "gobook/src/user/service"
 	"net/http"
@@ -19,9 +20,12 @@ func NewUserHandler(userService userService.UserService) *UserHandler {
 
 func (userHandler *UserHandler) Route(r *gin.RouterGroup) {
 	userRouter := r.Group("/api/user")
-	userRouter.GET("/", userHandler.FindAll)
-	userRouter.GET("/:id", userHandler.FindById)
-	userRouter.POST("/", userHandler.Create)
+	userRouter.Use(middleware.AuthJwt)
+	{
+		userRouter.GET("/", userHandler.FindAll)
+		userRouter.GET("/:id", userHandler.FindById)
+		userRouter.POST("/", userHandler.Create)
+	}
 }
 
 func (userHandler *UserHandler) FindAll(ctx *gin.Context) {
