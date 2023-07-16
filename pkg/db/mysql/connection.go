@@ -11,10 +11,10 @@ import (
 func DB() *gorm.DB {
 
 	host := os.Getenv("DB_HOST")
-	port := "3306"
-	dbname := "gobook"
-	username := "root"
-	password := ""
+	port := os.Getenv("DB_PORT")
+	dbname := os.Getenv("DB_NAME")
+	username := os.Getenv("DB_USERNAME")
+	password := os.Getenv("DB_PASSWORD")
 
 	dsn := username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname + "?charset=utf8mb4&parseTime=True&loc=Local"
 

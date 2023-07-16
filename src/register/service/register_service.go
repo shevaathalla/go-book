@@ -1,6 +1,7 @@
 package register
 
 import (
+	"errors"
 	registerDto "gobook/src/register/dto"
 	userDto "gobook/src/user/dto"
 
@@ -27,7 +28,7 @@ func (registerService *RegisterServiceImpl) VerifyEmail(registerDto registerDto.
 	}
 
 	if user.CodeVerified != registerDto.VERIFICATION_CODE {
-		return err
+		return errors.New("invalid verification code")
 	}
 
 	registerService.userService.Verify(int(user.ID))

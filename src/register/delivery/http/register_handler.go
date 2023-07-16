@@ -60,7 +60,7 @@ func (registerHandler *RegisterHandler) Verify(ctx *gin.Context) {
 	requestErr := registerHandler.registerService.VerifyEmail(verifyRequestBody)
 
 	if requestErr != nil {
-		ctx.JSON(http.StatusBadRequest, utils.Response(http.StatusInternalServerError, requestErr.Error(), nil))
+		ctx.JSON(http.StatusInternalServerError, utils.Response(http.StatusInternalServerError, requestErr.Error(), nil))
 		ctx.Abort()
 		return
 	}
