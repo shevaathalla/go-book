@@ -44,6 +44,6 @@ func main() {
 	book.InitializeService(db).Route(&r.RouterGroup)
 	oauth.InitializeService(db).Route(&r.RouterGroup)
 	rental.InitializeService(db).Route(&r.RouterGroup)
-	r.Run("0.0.0.0:8000") // listen and serve on 0.0.0.0:8000 (for windows "localhost:8000")
+	r.Run() // listen and serve on 0.0.0.0:8000 (for windows "localhost:8000")
 
 }
