@@ -44,6 +44,11 @@ func main() {
 	book.InitializeService(db).Route(&r.RouterGroup)
 	oauth.InitializeService(db).Route(&r.RouterGroup)
 	rental.InitializeService(db).Route(&r.RouterGroup)
-	r.Run() // listen and serve on 0.0.0.0:8000 (for windows "localhost:8000")
+
+	if os.Getenv("APP_ENV") == "production" {
+		r.Run()
+	} else {
+		r.Run("127.0.0.1:8000")
+	}
 
 }
