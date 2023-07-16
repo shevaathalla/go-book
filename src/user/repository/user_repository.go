@@ -1,13 +1,14 @@
 package user
 
 import (
+	"gobook/pkg/utils"
 	userEntity "gobook/src/user/entity"
 
 	"gorm.io/gorm"
 )
 
 type UserRepository interface {
-	FindAll() []userEntity.User
+	FindAll(offset int, limit int) []userEntity.User
 	FindById(id int) (*userEntity.User, error)
 	FindByEmail(email string) (*userEntity.User, error)
 	Update(user userEntity.User) (*userEntity.User, error)
@@ -55,10 +56,10 @@ func (userRepository *UserRepositoryImpl) Create(user userEntity.User) (*userEnt
 }
 
 // FindAll implements UserRepository.
-func (userRepository *UserRepositoryImpl) FindAll() []userEntity.User {
+func (userRepository *UserRepositoryImpl) FindAll(offset int, limit int) []userEntity.User {
 	var users []userEntity.User
 
-	userRepository.db.Find(&users)
+	userRepository.db.Scopes(utils.Paginate(offset, limit)).Find(&users)
 
 	return users
 }

@@ -13,6 +13,7 @@ import (
 	oauth "gobook/src/oauth/injector"
 	publisher "gobook/src/publisher/injector"
 	register "gobook/src/register/injector"
+	rental "gobook/src/rental/injector"
 	user "gobook/src/user/injector"
 )
 
@@ -42,6 +43,7 @@ func main() {
 	publisher.InitializeService(db).Route(&r.RouterGroup)
 	book.InitializeService(db).Route(&r.RouterGroup)
 	oauth.InitializeService(db).Route(&r.RouterGroup)
+	rental.InitializeService(db).Route(&r.RouterGroup)
 	r.Run("127.0.0.1:8000") // listen and serve on 0.0.0.0:8000 (for windows "localhost:8000")
 
 }

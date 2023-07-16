@@ -11,7 +11,7 @@ import (
 )
 
 type UserService interface {
-	FindAll() []userEntity.User
+	FindAll(offset int, limit int) []userEntity.User
 	FindById(id int) (*userEntity.User, error)
 	FindByEmail(email string) (*userEntity.User, error)
 	Verify(id int) (*userEntity.User, error)
@@ -75,8 +75,8 @@ func (userService *UserServiceImpl) Create(userDto userDto.CreateUserRequest) (*
 }
 
 // FindAll implements UserService.
-func (userService *UserServiceImpl) FindAll() []userEntity.User {
-	return userService.userRepository.FindAll()
+func (userService *UserServiceImpl) FindAll(offset int, limit int) []userEntity.User {
+	return userService.userRepository.FindAll(offset, limit)
 }
 
 // FindById implements UserService.

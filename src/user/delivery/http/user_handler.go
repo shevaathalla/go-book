@@ -29,7 +29,18 @@ func (userHandler *UserHandler) Route(r *gin.RouterGroup) {
 }
 
 func (userHandler *UserHandler) FindAll(ctx *gin.Context) {
-	data := userHandler.userService.FindAll()
+	offset, _ := strconv.Atoi(ctx.Query("offset"))
+	limit, _ := strconv.Atoi(ctx.Query("limit"))
+
+	if offset < 0 || offset == 0 {
+		offset = 1
+	}
+
+	if limit < 0 {
+		limit = 10
+	}
+
+	data := userHandler.userService.FindAll(offset, limit)
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"status":  http.StatusOK,
